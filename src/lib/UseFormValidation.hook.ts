@@ -1,18 +1,18 @@
 import * as _ from 'lodash';
 import { useRef, useState } from "react";
 import { KeyValuePair, MutationTracker } from 'mutation-tracker';
-import { IFormValidator } from "../lib/IFormValidator";
-import { IValidationErrorMessage } from "../lib/IValidationErrorMessage";
-import { FormFieldState } from '../lib/FormFieldState';
+import { IFormValidator } from "./IFormValidator";
+import { IValidationErrorMessage } from "./IValidationErrorMessage";
+import { FormFieldState } from './FormFieldState';
 
-export function useFormValidation<T extends KeyValuePair>(validator: IFormValidator<IValidationErrorMessage>, data: T, initialyTouched?: string[]) {
-    const stateTracker = useRef(MutationTracker(data, { initiallyMutatedAttributes: initialyTouched }));
+export function useFormValidation<T extends KeyValuePair>(validator: IFormValidator<IValidationErrorMessage>, dataObject: T, initialyTouched?: string[]) {
+    const stateTracker = useRef(MutationTracker(dataObject, { initiallyMutatedAttributes: initialyTouched }));
     const [errors, setErrors] = useState<IValidationErrorMessage[]>([]);
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [, setIteration] = useState(0);
 
     function runValidation() {
-        validator.validate(data)
+        validator.validate(dataObject)
             .then((response) => {
                 setErrors(response);
             });
@@ -57,7 +57,7 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
         isSubmitting: submitting,
         runValidation: runValidation,
         setIsSubmitting: setIsSubmitting,
-        buildFieldState: buildFieldState,
+        getFieldState: buildFieldState,
         getFieldTouched: stateTracker.current.getMutatedByAttributeName,
         setFieldTouched: setMutatedByAttributeName,
         setFieldsTouched: setMutatedByAttributeNames,
