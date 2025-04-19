@@ -4,8 +4,9 @@
  */
 export type FormFieldState<T, E> = {
     name: string,
-    isFieldTouched: boolean;
+    touched: boolean;
+    dirty: boolean,
     currentValue: T,
     previousValue: T,
-    fieldError: E | null;
+    errors: E [];
 }

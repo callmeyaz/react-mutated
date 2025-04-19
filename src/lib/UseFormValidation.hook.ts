@@ -1,66 +1,130 @@
 import * as _ from 'lodash';
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KeyValuePair, MutationTracker } from 'mutation-tracker';
 import { IFormValidator } from "./IFormValidator";
 import { IValidationErrorMessage } from "./IValidationErrorMessage";
 import { FormFieldState } from './FormFieldState';
 
-export function useFormValidation<T extends KeyValuePair>(validator: IFormValidator<IValidationErrorMessage>, dataObject: T, initialyTouched?: string[]) {
-    const stateTracker = useRef(MutationTracker(dataObject, { initiallyMutatedAttributes: initialyTouched }));
-    const [errors, setErrors] = useState<IValidationErrorMessage[]>([]);
-    const [submitting, setSubmitting] = useState<boolean>(false);
-    const [, setIteration] = useState(0);
+export type FormVaidationConfig = {
+  initiallyTouched?: string[],
+  initiallyDirty?: string[],
+}
 
-    function runValidation() {
-        validator.validate(dataObject)
-            .then((response) => {
-                setErrors(response);
-            });
+export function useFormValidation<T extends KeyValuePair>(validator: IFormValidator<IValidationErrorMessage>, dataObject: T, config?: FormVaidationConfig) {
+  const [errors, setErrors] = useState<IValidationErrorMessage[]>([]);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [, setIteration] = useState(0);
+
+  //#region touchedStateTracker
+  const touchedStateTracker = useRef(MutationTracker(dataObject, {
+    defaultValue: false,
+    initialMutation: {
+      mutatedAttributes: config?.initiallyTouched,
+      mutatedValue: true
     }
+  }));
 
-    function setIsSubmitting(isSubmitting: boolean): void {
-        setSubmitting(isSubmitting);
+  function getFieldTouched(fieldName: string): boolean {
+    return touchedStateTracker.current.getMutatedByAttributeName(fieldName);
+  }
+
+  function setFieldTouched(value: boolean, fieldName: string) {
+    touchedStateTracker.current.setMutatedByAttributeName(value, fieldName);
+    TriggerChange();
+  }
+
+  function setFieldsTouched(value: boolean, fieldNames: string[]) {
+    touchedStateTracker.current.setMutatedByAttributeNames(value, fieldNames);
+    TriggerChange();
+  }
+
+  function setTouchedAll(value: boolean) {
+    touchedStateTracker.current.setAll(value);
+    TriggerChange();
+  }
+  //#endregion
+
+  //#region dirtyStateTracker
+  const dirtyStateTracker = useRef(MutationTracker(dataObject, {
+    defaultValue: false,
+    initialMutation: {
+      mutatedAttributes: config?.initiallyDirty,
+      mutatedValue: true
     }
+  }));
 
-    function buildFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T, IValidationErrorMessage> {
-        return {
-            name: name,
-            currentValue: currentValue,
-            previousValue: previousValue,
-            isFieldTouched: stateTracker.current.getMutatedByAttributeName(name),
-            fieldError: errors.find((item) => item.key === name) || null,
-        };
-    }
+  function getFieldDirty(fieldName: string): boolean {
+    return dirtyStateTracker.current.getMutatedByAttributeName(fieldName);
+  }
 
-    function TriggerChange() {
-        setIteration(x => x + 1);
-    }
+  function setFieldDirty(value: boolean, fieldName: string) {
+    dirtyStateTracker.current.setMutatedByAttributeName(value, fieldName);
+    TriggerChange();
+  }
 
-    function setMutatedByAttributeName(value: boolean, attributeName: string) {
-        stateTracker.current.setMutatedByAttributeName(value, attributeName);
-        TriggerChange();
-    }
+  function setFieldsDirty(value: boolean, fieldNames: string[]) {
+    dirtyStateTracker.current.setMutatedByAttributeNames(value, fieldNames);
+    TriggerChange();
+  }
 
-    function setMutatedByAttributeNames(value: boolean, attributeNames: string[]) {
-        stateTracker.current.setMutatedByAttributeNames(value, attributeNames);
-        TriggerChange();
-    }
+  function setDirtyAll(value: boolean) {
+    dirtyStateTracker.current.setAll(value);
+    TriggerChange();
+  }
 
-    function setAll(value: boolean) {
-        stateTracker.current.setAll(value);
-        TriggerChange();
-    }
+  //#endregion
 
+  function TriggerChange() {
+    setIteration(x => x + 1);
+  }
+
+  useEffect(() => {
+    runValidation();
+  }, [])
+
+  function runValidation() {
+    console.log("validating... ", dataObject)
+    validator.validate(dataObject)
+      .then((response) => {
+        setErrors(response);
+      });
+  }
+
+  function setIsSubmitting(isSubmitting: boolean): void {
+    setSubmitting(isSubmitting);
+  }
+
+  function getFieldErrors(fieldName: string): IValidationErrorMessage[] {
+    return _.filter(errors, (item) => item.key == fieldName);
+  }
+
+  function buildFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T, IValidationErrorMessage> {
     return {
-        errors: errors,
-        touched: stateTracker.current.state,
-        isSubmitting: submitting,
-        runValidation: runValidation,
-        setIsSubmitting: setIsSubmitting,
-        getFieldState: buildFieldState,
-        getFieldTouched: stateTracker.current.getMutatedByAttributeName,
-        setFieldTouched: setMutatedByAttributeName,
-        setFieldsTouched: setMutatedByAttributeNames,
-        touchedAll: setAll
-    }
+      name: name,
+      currentValue: currentValue,
+      previousValue: previousValue,
+      touched: touchedStateTracker.current.getMutatedByAttributeName(name),
+      dirty: dirtyStateTracker.current.getMutatedByAttributeName(name),
+      errors: errors.filter((item) => item.key === name),
+    };
+  }
+
+  return {
+    errors: errors,
+    touched: touchedStateTracker.current.state,
+    dirty: dirtyStateTracker.current.state,
+    isSubmitting: submitting,
+    validate: runValidation,
+    setIsSubmitting: setIsSubmitting,
+    getFieldState: buildFieldState,
+    getFieldTouched: getFieldTouched,
+    setFieldTouched: setFieldTouched,
+    setFieldsTouched: setFieldsTouched,
+    setTouchedAll: setTouchedAll,
+    getFieldDirty: getFieldDirty,
+    setFieldDirty: setFieldDirty,
+    setFieldsDirty: setFieldsDirty,
+    setDirtyAll: setDirtyAll,
+    getFieldErrors: getFieldErrors
+  }
 }
