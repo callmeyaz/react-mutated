@@ -4,6 +4,8 @@ import { KeyValuePair, MutationTracker } from 'mutation-tracker';
 import { IFormValidator } from "./IFormValidator";
 import { IValidationErrorMessage } from "./IValidationErrorMessage";
 import { FormFieldState } from './FormFieldState';
+import { flattenObjectToArray } from './ObjectUpdater';
+import { some } from 'lodash';
 
 export type FormVaidationConfig = {
   initiallyTouched?: string[],
@@ -74,6 +76,30 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
 
   //#endregion
 
+  //#region
+  function setIsSubmitting(isSubmitting: boolean): void {
+    setSubmitting(isSubmitting);
+  }
+
+  function getFieldErrors(fieldName: string): IValidationErrorMessage[] {
+    return _.filter(errors, (item) => item.key == fieldName);
+  }
+
+  function getFieldValid(fieldName: string): boolean {
+    return !!(_.filter(errors, (item) => item.key == fieldName).length);
+  }
+
+  function isDirty(): boolean {
+    return some(flattenObjectToArray(dirtyStateTracker.current.state, "."), (item) => item.value );
+  }
+
+  function isValid(): boolean {
+    return !!(errors.length);
+  }
+
+  //#endregion
+
+
   function TriggerChange() {
     setIteration(x => x + 1);
   }
@@ -90,22 +116,16 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
       });
   }
 
-  function setIsSubmitting(isSubmitting: boolean): void {
-    setSubmitting(isSubmitting);
-  }
-
-  function getFieldErrors(fieldName: string): IValidationErrorMessage[] {
-    return _.filter(errors, (item) => item.key == fieldName);
-  }
-
   function buildFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T, IValidationErrorMessage> {
+    var fieldErrors = errors.filter((item) => item.key === name);
     return {
       name: name,
       currentValue: currentValue,
       previousValue: previousValue,
       touched: touchedStateTracker.current.getMutatedByAttributeName(name),
       dirty: dirtyStateTracker.current.getMutatedByAttributeName(name),
-      errors: errors.filter((item) => item.key === name),
+      isValid: !!(fieldErrors.length),
+      errors: fieldErrors,
     };
   }
 
@@ -114,6 +134,8 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
     touched: touchedStateTracker.current.state,
     dirty: dirtyStateTracker.current.state,
     isSubmitting: submitting,
+    isDirty: isDirty,
+    isValid: isValid,
     validate: runValidation,
     setIsSubmitting: setIsSubmitting,
     getFieldState: buildFieldState,
@@ -125,6 +147,7 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
     setFieldDirty: setFieldDirty,
     setFieldsDirty: setFieldsDirty,
     setDirtyAll: setDirtyAll,
+    getFieldValid: getFieldValid,
     getFieldErrors: getFieldErrors
   }
 }
