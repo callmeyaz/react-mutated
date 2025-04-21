@@ -1,9 +1,9 @@
 import { YupValidator } from "../yup/YupValidator";
-import { useFormValidation } from "../lib/UseFormValidation.hook";
+import { useFormValidation } from "../lib/hooks/UseFormValidation.hook";
 import { User, user } from "./app.data";
 import { userSchema } from "./app.validation";
 import { useEffect, useState } from "react";
-import { setDeep } from "../lib/ObjectUpdater";
+import { setDeep } from "../lib/Utils";
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
@@ -12,12 +12,12 @@ function App() {
     touched,
     dirty,
     isSubmitting,
-    errorList,
+    errorFlatList,
     validate,
     validateAsync,
     setIsSubmitting,
-    isDirty,
-    isValid,
+    isFormDirty,
+    isFormValid,
     getFieldState,
     getFieldTouched,
     setFieldTouched,
@@ -41,13 +41,15 @@ function App() {
   }
 
   function addRole() {
-    setUserState({...userState, roles: [...userState.roles, ""] });
+    var roles = [...userState.roles, ""]
+    setUserState({ ...userState, roles: roles });
+    setFieldsTouched(true, roles.map((_, index) => `roles[${index}]`))
   }
 
   return (
     <>
       <div style={{ display: "flex" }}>
-        <div style={{ flex: "0 0 500" }}>
+        <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
 
           <div style={{ marginBottom: 20 }}>
             <div>Field State for firstname:</div>
@@ -70,22 +72,45 @@ function App() {
 
           <div style={{ marginBottom: 20 }}>
             <div>Multiple Field Touched - [firstname, lastname]:</div>
-            <pre>{JSON.stringify(touched, null, 2)}</pre>
             <button onClick={() => setFieldsTouched(true, ["name.firstname", "name.lastname"])} >Touched</button>
             <button onClick={() => setFieldsTouched(false, ["name.firstname", "name.lastname"])} >Untouched</button>
           </div>
 
           <div style={{ marginBottom: 20 }}>
             <div>All Fields Touched:</div>
-            <pre>{JSON.stringify(touched, null, 2)}</pre>
             <button onClick={() => setTouchedAll(true)} >Touched</button>
             <button onClick={() => setTouchedAll(false)} >Untouched</button>
           </div>
 
+          <div style={{ marginBottom: 20 }}>
+            <div>Field Dirty (by name) - firstname: {JSON.stringify(getFieldDirty("name.firstname"))}</div>
+            <div>Field Dirty (by ref) - firstname: {JSON.stringify(dirty?.name?.firstname)}</div>
+            <button onClick={() => setFieldDirty(true, "name.firstname")} >Dirty</button>
+            <button onClick={() => setFieldDirty(false, "name.firstname")} >Not Dirty</button>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <div>Multiple Field Dirty - [firstname, lastname]:</div>
+            <button onClick={() => setFieldsDirty(true, ["name.firstname", "name.lastname"])} >Dirty</button>
+            <button onClick={() => setFieldsDirty(false, ["name.firstname", "name.lastname"])} >Not Dirty</button>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <div>All Fields Dirty:</div>
+            <button onClick={() => setDirtyAll(true)} >Dirty</button>
+            <button onClick={() => setDirtyAll(false)} >Not Dirty</button>
+          </div>
+
+
+
+
+
+
+
+
         </div>
 
-
-        <div style={{ flex: "1 1 0", padding: 50 }}>
+        <div style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, padding: 50 }}>
           <div style={{ marginBottom: 20 }}>
             <div>Initial Sample Data</div>
             <textarea readOnly={true} style={{ width: "100%", border: 0, outline: "none", resize: "none", height: 50 }} defaultValue={JSON.stringify(user)}></textarea>
@@ -95,10 +120,9 @@ function App() {
           </div>
           <div>
             <div>First Name</div>
-            <div>{!!touched?.name?.firstname && JSON.stringify(errors?.name?.firstname)}</div>
+            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item) => <li>{item}</li>)}</ul>
             <input
               onChange={(e) => {
-                console.log(e);
                 setUserState(s => s && setDeep(s, e.target.value, "name.firstname"));
                 setFieldDirty(true, "name.firstname");
               }}
@@ -109,7 +133,7 @@ function App() {
           </div>
           <div>
             <div>Last Name</div>
-            <div>{!!touched?.name?.lastname && JSON.stringify(errors?.name?.lastname)}</div>
+            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item) => <li>{item}</li>)}</ul>
             <input onChange={(e) => {
               setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
               setFieldDirty(true, "name.lastname");
@@ -121,10 +145,10 @@ function App() {
           </div>
           <div>
             <div>Roles</div>
-              {
-                userState.roles.map((item, index) => (
-                  <div>
-                  <div>{touched.roles?.[index] && JSON.stringify(errors?.roles?.[index])}</div>
+            {
+              userState.roles.map((item, index) => (
+                <div key={index}>
+                  <ul>{!!touched?.roles?.[index] && errors?.roles?.[index]?.map((item, i) => <li key={i}>{item}</li>)}</ul>
                   <input key={index} defaultValue={item} onChange={
                     (e) => {
                       setUserState(s => s && setDeep(s, e.target.value, `roles[${index}]`));
@@ -135,12 +159,12 @@ function App() {
                     }}
                   />
                 </div>
-                ))
-              }
+              ))
+            }
           </div>
           <div>
             <div>Address</div>
-            <div>{!!touched?.address && JSON.stringify(errors?.address)}</div>
+            <ul>{!!touched?.address && errors?.address?.map((item) => <li>{item}</li>)}</ul>
             <input onChange={
               (e) => {
                 setUserState(s => s && setDeep(s, e.target.value, "address"));
@@ -155,10 +179,7 @@ function App() {
           <button onClick={() => addRole()} >Add Role</button>
         </div>
 
-        <pre>{JSON.stringify(errorList, null, 2)}</pre>
-
-        <div style={{ flex: "0 0 500" }}>
-
+        <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 500 }}>
 
           <div style={{ marginBottom: 20 }}>
             <div>Form State:</div>
@@ -171,15 +192,14 @@ function App() {
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <div>Form Dirty:</div>
-            <pre>{JSON.stringify(dirty, null, 2)}</pre>
-          </div>
-
-          <div style={{ marginBottom: 20 }}>
             <div>Form Touched:</div>
             <pre>{JSON.stringify(touched, null, 2)}</pre>
           </div>
 
+          <div style={{ marginBottom: 20 }}>
+            <div>Form Dirty:</div>
+            <pre>{JSON.stringify(dirty, null, 2)}</pre>
+          </div>
 
         </div>
       </div>

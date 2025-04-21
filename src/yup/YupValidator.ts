@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { IFormValidator } from "../lib/IFormValidator";
+import { IFormValidator } from "../lib/types/IFormValidator";
 import { IYupValidationErrorMessage } from "./IYupValidationErrorMessage";
 
 /**

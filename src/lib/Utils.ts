@@ -10,10 +10,8 @@ export function setDeep<T>(obj: any, value: T, path: string): any {
 }
 
 export function flattenObject(obj: any, separator: string) {
-
   function recursive(current: any, parentKey: string = '', separator: string = ".") {
     const result = {};
-
     for (const key in current) {
       if (current.hasOwnProperty(key)) {
         const newKey = parentKey ? parentKey + separator + key : key;
@@ -24,16 +22,13 @@ export function flattenObject(obj: any, separator: string) {
         }
       }
     }
-
     return result;
   }
-
   return recursive(obj, '', separator);
 }
 
 export function flattenObjectToArray(obj: any, separator: string) {
   const result: { key: string, value: any }[] = [];
-
   function recurse(current: any, parentKey: string = '', separator: string = ".") {
     for (const key in current) {
       if (current.hasOwnProperty(key)) {
@@ -47,7 +42,6 @@ export function flattenObjectToArray(obj: any, separator: string) {
       }
     }
   }
-
   recurse(obj, '', separator);
   return result;
 }

@@ -1,4 +1,4 @@
-import { IValidationErrorMessage } from "../lib/IValidationErrorMessage";
+import { IValidationErrorMessage } from "../lib/types/IValidationErrorMessage";
 
 /**
  * Yup validation error message
