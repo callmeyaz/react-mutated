@@ -79,8 +79,6 @@ export function useFormFieldState<T extends { [field: string]: any }>(dataObject
   //#endregion
 
   function isFormDirty(): boolean {
-    console.log("isdirty", flattenObjectToArray(dirtyStateTracker.state, "."), some(flattenObjectToArray(dirtyStateTracker.state, "."), (item) => item.value));
-
     return some(flattenObjectToArray(dirtyStateTracker.state, "."), (item) => item.value);
   }
 
