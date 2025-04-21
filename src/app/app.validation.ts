@@ -1,15 +1,15 @@
 import * as Yup from "yup";
-import { User } from "./user.data";
+import { User } from "./app.data";
 import { IYupValidationErrorMessage } from "../yup/IYupValidationErrorMessage";
 
 export const userSchema: Yup.ObjectSchema<User> = Yup.object({
   name: Yup.object({
-    firstname: Yup.string().default('')
+    firstname: Yup.string().defined()
       .test("name.firstname", "", function (item) {
         if (!item) {
           return this.createError({
             message: {
-              key: "name.firstname",
+              key: this.path,
               message: "Firstname not provided.",
               errorCode: "0001"
             } as Yup.Message<IYupValidationErrorMessage>
@@ -17,12 +17,12 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
         }
         return true;
       }),
-    lastname: Yup.string().default('')
+    lastname: Yup.string().defined()
       .test("name.lastname", "", function (item) {
         if (!item) {
           return this.createError({
             message: {
-              key: "name.lastname",
+              key: this.path,
               message: "Lastname not provided.",
               errorCode: "0002"
             } as Yup.Message<IYupValidationErrorMessage>
@@ -31,12 +31,27 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
         return true;
       })
   }),
-  address: Yup.string().default('')
+  roles: Yup.array().defined().of(
+    Yup.string().defined()
+      .test("roles", "", function (item) {
+        if (!item) {
+          return this.createError({
+            message: {
+              key: this.path,
+              message: "Role Not provided",
+              errorCode: "0004"
+            } as Yup.Message<IYupValidationErrorMessage>
+          });
+        }
+        return true;
+      })
+  ),
+  address: Yup.string().defined()
     .test("address", "", function (item) {
       if (!item) {
         return this.createError({
           message: {
-            key: "address",
+            key: this.path,
             message: "Address Not provided",
             errorCode: "0003"
           } as Yup.Message<IYupValidationErrorMessage>

@@ -12,7 +12,7 @@
   "dependencies": {
     "@types/lodash": "^4.17.16",
     "lodash": "^4.17.21",
-    "mutation-tracker": "^1.0.17",
+    "mutation-tracker": "^1.0.19",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "yup": "^1.6.1"

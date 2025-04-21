@@ -1,11 +1,10 @@
-import * as _ from 'lodash';
 import { useEffect, useRef, useState } from "react";
 import { KeyValuePair, MutationTracker } from 'mutation-tracker';
 import { IFormValidator } from "./IFormValidator";
 import { IValidationErrorMessage } from "./IValidationErrorMessage";
 import { FormFieldState } from './FormFieldState';
 import { flattenObjectToArray } from './ObjectUpdater';
-import { some } from 'lodash';
+import { some, filter, forEach } from 'lodash';
 
 export type FormVaidationConfig = {
   initiallyTouched?: string[],
@@ -13,10 +12,6 @@ export type FormVaidationConfig = {
 }
 
 export function useFormValidation<T extends KeyValuePair>(validator: IFormValidator<IValidationErrorMessage>, dataObject: T, config?: FormVaidationConfig) {
-  const [errors, setErrors] = useState<IValidationErrorMessage[]>([]);
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const [, setIteration] = useState(0);
-
   //#region touchedStateTracker
   const touchedStateTracker = useRef(MutationTracker(dataObject, {
     defaultValue: false,
@@ -76,48 +71,24 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
 
   //#endregion
 
-  //#region
-  function setIsSubmitting(isSubmitting: boolean): void {
-    setSubmitting(isSubmitting);
-  }
+  //#region validStateTracker
+  const validStateTracker = useRef(MutationTracker<string[], T>(dataObject, {
+    defaultValue: []
+  }));
+  //#endregion
 
-  function getFieldErrors(fieldName: string): IValidationErrorMessage[] {
-    return _.filter(errors, (item) => item.key == fieldName);
+  //#region Field functions
+
+  function getFieldErrors(fieldName: string): string[] {
+    return filter(errorList, (item) => item.key == fieldName).map(item => item.message);
   }
 
   function getFieldValid(fieldName: string): boolean {
-    return !!(_.filter(errors, (item) => item.key == fieldName).length);
+    return !!(filter(errorList, item => item.key == fieldName).length);
   }
 
-  function isDirty(): boolean {
-    return some(flattenObjectToArray(dirtyStateTracker.current.state, "."), (item) => item.value );
-  }
-
-  function isValid(): boolean {
-    return !!(errors.length);
-  }
-
-  //#endregion
-
-
-  function TriggerChange() {
-    setIteration(x => x + 1);
-  }
-
-  useEffect(() => {
-    runValidation();
-  }, [])
-
-  function runValidation() {
-    console.log("validating... ", dataObject)
-    validator.validate(dataObject)
-      .then((response) => {
-        setErrors(response);
-      });
-  }
-
-  function buildFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T, IValidationErrorMessage> {
-    var fieldErrors = errors.filter((item) => item.key === name);
+  function buildFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T> {
+    var fieldErrors = validStateTracker.current.getMutatedByAttributeName(name);
     return {
       name: name,
       currentValue: currentValue,
@@ -129,14 +100,70 @@ export function useFormValidation<T extends KeyValuePair>(validator: IFormValida
     };
   }
 
+  //#endregion
+
+  //#region form functions
+
+  function setIsSubmitting(isSubmitting: boolean): void {
+    setSubmitting(isSubmitting);
+  }
+
+  function isDirty(): boolean {
+    return some(flattenObjectToArray(dirtyStateTracker.current.state, "."), (item) => item.value);
+  }
+
+  function isValid(): boolean {
+    return !!(errorList.length);
+  }
+
+  //#endregion
+
+  const [errorList, setErrorList] = useState<IValidationErrorMessage[]>([]);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [, setIteration] = useState(0);
+
+  function TriggerChange() {
+    setIteration(x => x + 1);
+  }
+
+  useEffect(() => {
+    validate();
+  }, [])
+
+  function validate(): boolean {
+    var result: boolean = false;
+    (
+      async () => await validateAsync()
+        .then((response) => result = response)
+        .catch(() => result = false)
+    )();
+    return result;
+  }
+
+  function validateAsync(): Promise<boolean> {
+    return validator.validate(dataObject)
+      .then((response) => {
+        setErrorList(response);
+        var groups = Object.groupBy(response, ({ key }) => key)
+        validStateTracker.current.clear();
+        forEach(groups, (group, key) => {
+          var messages = group?.map(x => x.message) || [];
+          validStateTracker.current.setMutatedByAttributeName(messages, key);
+        });
+        return isValid();
+      });
+  }
+
   return {
-    errors: errors,
+    errorList: errorList,
+    errors: validStateTracker.current.state,
     touched: touchedStateTracker.current.state,
     dirty: dirtyStateTracker.current.state,
     isSubmitting: submitting,
     isDirty: isDirty,
     isValid: isValid,
-    validate: runValidation,
+    validateAsync: validateAsync,
+    validate: validate,
     setIsSubmitting: setIsSubmitting,
     getFieldState: buildFieldState,
     getFieldTouched: getFieldTouched,

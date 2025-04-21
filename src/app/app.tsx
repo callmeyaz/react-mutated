@@ -1,9 +1,9 @@
 import { YupValidator } from "../yup/YupValidator";
 import { useFormValidation } from "../lib/UseFormValidation.hook";
-import { User, user } from "./user.data";
+import { User, user } from "./app.data";
 import { userSchema } from "./app.validation";
 import { useEffect, useState } from "react";
-import { flattenObjectToArray, setDeep } from "../lib/ObjectUpdater";
+import { setDeep } from "../lib/ObjectUpdater";
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
@@ -12,8 +12,10 @@ function App() {
     touched,
     dirty,
     isSubmitting,
+    errorList,
     validate,
-    setIsSubmitting: setIsSubmitting,
+    validateAsync,
+    setIsSubmitting,
     isDirty,
     isValid,
     getFieldState,
@@ -34,8 +36,12 @@ function App() {
     runValidation();
   }, [userState])
 
-  function runValidation() {
-    validate();
+  function runValidation(): boolean {
+    return validate();
+  }
+
+  function addRole() {
+    setUserState({...userState, roles: [...userState.roles, ""] });
   }
 
   return (
@@ -77,20 +83,19 @@ function App() {
           </div>
 
         </div>
+
+
         <div style={{ flex: "1 1 0", padding: 50 }}>
           <div style={{ marginBottom: 20 }}>
             <div>Initial Sample Data</div>
             <textarea readOnly={true} style={{ width: "100%", border: 0, outline: "none", resize: "none", height: 50 }} defaultValue={JSON.stringify(user)}></textarea>
           </div>
-
-
           <div style={{ marginBottom: 20 }}>
             <h2>User Form</h2>
           </div>
-
           <div>
             <div>First Name</div>
-            <div>{getFieldTouched("name.firstname") && JSON.stringify(getFieldErrors("name.firstname"))}</div>
+            <div>{!!touched?.name?.firstname && JSON.stringify(errors?.name?.firstname)}</div>
             <input
               onChange={(e) => {
                 console.log(e);
@@ -104,7 +109,7 @@ function App() {
           </div>
           <div>
             <div>Last Name</div>
-            <div>{getFieldTouched("name.lastname") && JSON.stringify(getFieldErrors("name.lastname"))}</div>
+            <div>{!!touched?.name?.lastname && JSON.stringify(errors?.name?.lastname)}</div>
             <input onChange={(e) => {
               setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
               setFieldDirty(true, "name.lastname");
@@ -115,8 +120,27 @@ function App() {
             />
           </div>
           <div>
+            <div>Roles</div>
+              {
+                userState.roles.map((item, index) => (
+                  <div>
+                  <div>{touched.roles?.[index] && JSON.stringify(errors?.roles?.[index])}</div>
+                  <input key={index} defaultValue={item} onChange={
+                    (e) => {
+                      setUserState(s => s && setDeep(s, e.target.value, `roles[${index}]`));
+                      setFieldDirty(true, `roles[${index}]`);
+                    }}
+                    onBlur={() => {
+                      setFieldTouched(true, `roles[${index}]`);
+                    }}
+                  />
+                </div>
+                ))
+              }
+          </div>
+          <div>
             <div>Address</div>
-            <div>{getFieldTouched("address") && JSON.stringify(getFieldErrors("address"))}</div>
+            <div>{!!touched?.address && JSON.stringify(errors?.address)}</div>
             <input onChange={
               (e) => {
                 setUserState(s => s && setDeep(s, e.target.value, "address"));
@@ -127,12 +151,12 @@ function App() {
               }}
             />
           </div>
-
-
-          <button onClick={() => runValidation()} >validate</button>
-
-
+          <button onClick={() => runValidation()} >Validate</button>
+          <button onClick={() => addRole()} >Add Role</button>
         </div>
+
+        <pre>{JSON.stringify(errorList, null, 2)}</pre>
+
         <div style={{ flex: "0 0 500" }}>
 
 

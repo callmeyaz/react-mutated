@@ -3,6 +3,7 @@ export type User = {
     firstname: string,
     lastname: string
   },
+  roles: string[],
   address: string
 };
 
@@ -11,5 +12,9 @@ export const user = {
     firstname: "",
     lastname: ""
   },
+  roles: [
+    "",
+    ""
+  ],
   address: ""
 } as User;
