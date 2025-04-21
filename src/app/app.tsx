@@ -56,15 +56,20 @@ function App() {
             <pre>{JSON.stringify(getFieldState("name.firstname", userState.name.firstname, userState.name.firstname), null, 2)}</pre>
           </div>
 
+          <div>Is Form Valid: { JSON.stringify(isFormValid()) }</div>
+          <div>Is Form Dirty: { JSON.stringify(isFormDirty()) }</div>
+          <div>Field Touched (by name) - firstname: {JSON.stringify(getFieldTouched("name.firstname"))}</div>
+          <div>Field Dirty (by name) - firstname: {JSON.stringify(getFieldDirty("name.firstname"))}</div>
+          <div>Field Valid (by name) - firstname: {JSON.stringify(getFieldValid("name.firstname"))}</div>
+          <div>Field Errors (by name) - firstname: {JSON.stringify(getFieldErrors("name.firstname"))}</div>
+
           <div style={{ marginBottom: 20 }}>
-            <div>Submitting</div>
-            <div><span>IsSubmitting: </span>{JSON.stringify(isSubmitting)}</div>
+            <div><span>Submitting: </span>{JSON.stringify(isSubmitting)}</div>
             <button onClick={() => setIsSubmitting(true)} >Submitting</button>
             <button onClick={() => setIsSubmitting(false)} >Unsubmitting</button>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <div>Field Touched (by name) - firstname: {JSON.stringify(getFieldTouched("name.firstname"))}</div>
             <div>Field Touched (by ref) - firstname: {JSON.stringify(touched?.name?.firstname)}</div>
             <button onClick={() => setFieldTouched(true, "name.firstname")} >Touched</button>
             <button onClick={() => setFieldTouched(false, "name.firstname")} >Untouched</button>
@@ -83,7 +88,6 @@ function App() {
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <div>Field Dirty (by name) - firstname: {JSON.stringify(getFieldDirty("name.firstname"))}</div>
             <div>Field Dirty (by ref) - firstname: {JSON.stringify(dirty?.name?.firstname)}</div>
             <button onClick={() => setFieldDirty(true, "name.firstname")} >Dirty</button>
             <button onClick={() => setFieldDirty(false, "name.firstname")} >Not Dirty</button>
@@ -101,11 +105,10 @@ function App() {
             <button onClick={() => setDirtyAll(false)} >Not Dirty</button>
           </div>
 
-
-
-
-
-
+          <div style={{ marginBottom: 20 }}>
+            <div>Error Flat List:</div>
+            <div>{JSON.stringify(errorFlatList)}</div>
+          </div>
 
 
         </div>
@@ -119,8 +122,8 @@ function App() {
             <h2>User Form</h2>
           </div>
           <div>
+            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item, index) => <li key={index}>{item}</li>)}</ul>
             <div>First Name</div>
-            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item) => <li>{item}</li>)}</ul>
             <input
               onChange={(e) => {
                 setUserState(s => s && setDeep(s, e.target.value, "name.firstname"));
@@ -132,8 +135,8 @@ function App() {
             />
           </div>
           <div>
+            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item, index) => <li key={index}>{item}</li>)}</ul>
             <div>Last Name</div>
-            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item) => <li>{item}</li>)}</ul>
             <input onChange={(e) => {
               setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
               setFieldDirty(true, "name.lastname");
@@ -163,8 +166,8 @@ function App() {
             }
           </div>
           <div>
+            <ul>{!!touched?.address && errors?.address?.map((item, index) => <li key={index}>{item}</li>)}</ul>
             <div>Address</div>
-            <ul>{!!touched?.address && errors?.address?.map((item) => <li>{item}</li>)}</ul>
             <input onChange={
               (e) => {
                 setUserState(s => s && setDeep(s, e.target.value, "address"));

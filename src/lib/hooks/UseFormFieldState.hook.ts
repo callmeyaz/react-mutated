@@ -64,12 +64,11 @@ export function useFormFieldState<T extends { [field: string]: any }>(dataObject
 
   //#region validation functions
   function getFieldValid(fieldName: string): boolean {
-    return validStateTracker.getMutatedByAttributeName(fieldName)?.length <= 0 || true;
+    return (validStateTracker.getMutatedByAttributeName(fieldName).length ?? 0) <= 0;
   }
 
   function setErrorsAll(errors: IValidationErrorMessage[]) {
     setErrorFlatList(errors);
-    console.log("validating ....", errors, validStateTracker.state);
     validStateTracker.clear();
     var groups = Object.groupBy(errors, ({ key }) => key)
     forEach(groups, (group, key) => {
@@ -80,11 +79,13 @@ export function useFormFieldState<T extends { [field: string]: any }>(dataObject
   //#endregion
 
   function isFormDirty(): boolean {
+    console.log("isdirty", flattenObjectToArray(dirtyStateTracker.state, "."), some(flattenObjectToArray(dirtyStateTracker.state, "."), (item) => item.value));
+
     return some(flattenObjectToArray(dirtyStateTracker.state, "."), (item) => item.value);
   }
 
   function isFormValid(): boolean {
-    return !!(errorFlatList.length);
+    return !(errorFlatList.length);
   }
 
   function getFieldState<T>(name: string, currentValue: T, previousValue: T): FormFieldState<T> {
