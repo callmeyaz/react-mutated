@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { IFormValidator } from "../lib/types/IFormValidator";
+import { IFormValidator } from "react-mable";
 import { IYupValidationErrorMessage } from "./IYupValidationErrorMessage";
 
 /**

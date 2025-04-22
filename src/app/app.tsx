@@ -1,9 +1,9 @@
 import { YupValidator } from "../yup/YupValidator";
-import { useFormValidation } from "../lib/hooks/UseFormValidation.hook";
+import { useMabel } from "react-mable";
+import { setDeep } from "react-mable";
 import { User, user } from "./app.data";
 import { userSchema } from "./app.validation";
 import { useEffect, useState } from "react";
-import { setDeep } from "../lib/Utils";
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
@@ -30,7 +30,7 @@ function App() {
     getFieldValid,
     getFieldErrors
 
-  } = useFormValidation(new YupValidator(userSchema), userState, {});
+  } = useMabel(new YupValidator(userSchema), userState, {});
 
   useEffect(() => {
     runValidation();
@@ -122,7 +122,7 @@ function App() {
             <h2>User Form</h2>
           </div>
           <div>
-            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item, index) => <li key={index}>{item}</li>)}</ul>
+            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>First Name</div>
             <input
               onChange={(e) => {
@@ -135,7 +135,7 @@ function App() {
             />
           </div>
           <div>
-            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item, index) => <li key={index}>{item}</li>)}</ul>
+            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Last Name</div>
             <input onChange={(e) => {
               setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
@@ -151,7 +151,7 @@ function App() {
             {
               userState.roles.map((item, index) => (
                 <div key={index}>
-                  <ul>{!!touched?.roles?.[index] && errors?.roles?.[index]?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                  <ul>{!!touched?.roles?.[index] && errors?.roles?.[index]?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
                   <input key={index} defaultValue={item} onChange={
                     (e) => {
                       setUserState(s => s && setDeep(s, e.target.value, `roles[${index}]`));
@@ -166,7 +166,7 @@ function App() {
             }
           </div>
           <div>
-            <ul>{!!touched?.address && errors?.address?.map((item, index) => <li key={index}>{item}</li>)}</ul>
+            <ul>{!!touched?.address && errors?.address?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Address</div>
             <input onChange={
               (e) => {
