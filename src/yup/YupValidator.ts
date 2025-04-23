@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { IFormValidator } from "react-mabel";
+import { IFormValidator } from "form-runner";
 import { IYupValidationErrorMessage } from "./IYupValidationErrorMessage";
 
 /**

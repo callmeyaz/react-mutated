@@ -1,6 +1,6 @@
 import { YupValidator } from "../yup/YupValidator";
-import { useMabel } from "react-mabel";
-import { setDeep } from "react-mabel";
+import { useFormRunner } from "react-form-runner";
+import { setDeep } from "react-form-runner";
 import { User, user } from "./app.data";
 import { userSchema } from "./app.validation";
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ function App() {
     getFieldValid,
     getFieldErrors
 
-  } = useMabel(new YupValidator(userSchema), userState, {});
+  } = useFormRunner(new YupValidator(userSchema), userState, {});
 
   useEffect(() => {
     runValidation();

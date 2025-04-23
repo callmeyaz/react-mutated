@@ -1,4 +1,4 @@
-import { IValidationErrorMessage } from "react-mabel";
+import { IValidationErrorMessage } from "form-runner";
 
 /**
  * Yup validation error message
