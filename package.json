@@ -25,7 +25,7 @@
     "yup": "^1.6.1"
   },
   "dependencies": {
-    "mutation-tracker": "^1.0.21",
-    "react-mable": "github:callmeyaz/react-mable"
+    "mutation-tracker": "^1.0.26",
+    "react-mabel": "github:callmeyaz/react-mabel"
   }
 }

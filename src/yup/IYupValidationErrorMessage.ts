@@ -1,4 +1,4 @@
-import { IValidationErrorMessage } from "react-mable";
+import { IValidationErrorMessage } from "react-mabel";
 
 /**
  * Yup validation error message

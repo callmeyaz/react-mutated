@@ -1,6 +1,6 @@
 import { YupValidator } from "../yup/YupValidator";
-import { useMabel } from "react-mable";
-import { setDeep } from "react-mable";
+import { useMabel } from "react-mabel";
+import { setDeep } from "react-mabel";
 import { User, user } from "./app.data";
 import { userSchema } from "./app.validation";
 import { useEffect, useState } from "react";
