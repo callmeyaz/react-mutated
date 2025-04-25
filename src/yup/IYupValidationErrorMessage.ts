@@ -1,8 +1,8 @@
-import { IValidationErrorMessage } from "form-runner";
+import { IValidationMessage } from "form-runner";
 
 /**
  * Yup validation error message
  */
-export interface IYupValidationErrorMessage extends IValidationErrorMessage, Record<string, unknown> {
+export interface IYupValidationErrorMessage extends IValidationMessage, Record<string, unknown> {
     errorCode: string
 }
