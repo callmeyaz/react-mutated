@@ -29,28 +29,37 @@ class YupValidator<T extends Yup.Maybe<Yup.AnyObject>> implements IFormValidator
     }
 }
 
+// Create Yup validation schema
 export const userSchema: Yup.ObjectSchema<typeof user> = Yup.object({
     name: Yup.object({
-        firstname: Yup.string().defined().test(function(val) { return !val ?
-            this.createError({ message: { key: this.path, message: "First name not provided" } as Yup.Message<IYupValidationMessage> })
-            : true 
-        }),
-        lastname: Yup.string().defined().test(function(val) { return !val ?
-            this.createError({ message: { key: this.path, message: "Last name not provided" } as Yup.Message<IYupValidationMessage> })
-            : true 
-        })
+      firstname: Yup.string().defined().test(function(val) { return !val ?
+        this.createError({ 
+          message: { key: this.path, message: "First name not provided" } as 
+            Yup.Message<IYupValidationMessage> })
+        : true 
+      }),
+      lastname: Yup.string().defined().test(function(val) { return !val ?
+        this.createError({ 
+          message: { key: this.path, message: "Last name not provided" } as 
+            Yup.Message<IYupValidationMessage> })
+        : true 
+      })
     }),
     roles:  Yup.array().defined().of(
-        Yup.string().defined().test(function(val) { return !val ?
-            this.createError({ message: { key: this.path, message: "Role not provided" } as Yup.Message<IYupValidationMessage> })
-            : true 
-        })
+      Yup.string().defined().test(function(val) { return !val ?
+        this.createError({ 
+          message: { key: this.path, message: "Role not provided" } as 
+            Yup.Message<IYupValidationMessage> })
+        : true 
+      })
     ),
     address: Yup.string().defined().test(function(val) { return !val ?
-        this.createError({ message: { key: this.path, message: "Address not provided" } as Yup.Message<IYupValidationMessage> })
-        : true 
+      this.createError({ 
+        message: { key: this.path, message: "Address not provided" } as 
+            Yup.Message<IYupValidationMessage> })
+      : true 
     })
-});
+  });
 
 var validator = new YupValidator(userSchema);
 var runner = new FormRunner<typeof user>(validator, user);
