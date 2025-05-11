@@ -1,6 +1,6 @@
 import { user } from "../src/app/app.data";
-import { YupFormBuilder, YupFormField } from "../src/lib/DataTypes";
-import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../src/lib/ValidatorFunctions";
+import { YupFormBuilder, YupFormField } from "../src/yup/YupFormBuilder";
+import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../src/lib/Validators";
 import * as Yup from "yup";
 
 var builder = new YupFormBuilder();

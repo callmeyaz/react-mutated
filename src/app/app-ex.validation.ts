@@ -1,6 +1,6 @@
 import * as Yup from "yup";
 import { User } from "./app.data";
-import { IYupValidationMessage } from "../yup/IYupValidationErrorMessage";
+import { IYupValidationMessage } from "../yup/IYupValidationMessage";
 
 
 export const AppExSchema: Yup.ObjectSchema<User> = Yup.object({

@@ -1,11 +1,25 @@
 import { YupValidator } from "../yup/YupValidator";
 import { useFormRunner } from "react-form-runner";
 import { User, user } from "./app.data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { setDeep } from "./utils";
+import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
+import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
+import * as Yup from "yup";
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
+
+  const builder = new YupFormBuilder();
+  const formGroup = builder.group({
+    name: builder.group({
+      firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
+    }, []),
+    roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new YupFormField(Yup.string().defined(), [requiredValidator()])
+  }, []);
+
   const {
     errors,
     touched,
@@ -17,13 +31,19 @@ function App() {
     setDirtyAll,
     setFieldDirty,
     setFieldTouched,
-  } = useFormRunner(new YupValidator(), userState, {});
+  } = useFormRunner(new YupValidator(formGroup), userState, {});
 
   function reset() {
     setUserState(user);
     setDirtyAll(false);
     setTouchedAll(false);
   }
+
+  // why validation is not working from react-form-runner
+  useEffect(() => {
+    validate(userState);
+  }, [userState]);
+
 
   function addRole() {
     var roles = [...userState.roles, ""]
