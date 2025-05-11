@@ -6,10 +6,8 @@ export class YupValidator {
   }
 
   public validate(data: any): Promise<IYupValidationMessage[]> {
-    console.log("Validating data", data);
     return this.config.validate(data)
       .then((errors) => {
-        console.log("Validation errors", errors);
         return errors;
       })
   }

@@ -7,6 +7,7 @@ import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
 import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
 import * as Yup from "yup";
 
+
 const builder = new YupFormBuilder();
 const formGroup = builder.group({
   name: builder.group({
@@ -19,7 +20,6 @@ const formGroup = builder.group({
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
-
   const {
     errors,
     touched,

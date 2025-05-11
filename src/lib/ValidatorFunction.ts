@@ -1,5 +1,5 @@
 
-export type AbstractControl<T> = {
+export type AbstractFieldOptions<T> = {
   path: string,
   value: T,
   parent: any
@@ -12,5 +12,5 @@ export interface ValidationResult {
 }
 
 export interface ValidatorFunction<T> {
-  (control: AbstractControl<T>): ValidationResult | null;
+  (fieldOptions: AbstractFieldOptions<T>): ValidationResult | null;
 }

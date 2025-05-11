@@ -1,24 +1,28 @@
 
 
 import { IYupValidationMessage } from "./IYupValidationMessage";
-import { AbstractControl, ValidatorFunction } from "../lib/ValidatorFunction";
-import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TGroup } from "../lib/FormBuilder";
+import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
+import { IFormBuilder, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Yup from "yup";
 
 export interface IYupSchemaProvider {
   getSchema: () => Yup.Schema;
 }
 
+// export interface YTField<E extends IYupValidationMessage>  extends TFormField<E> {}
+// export interface YTGroup<E extends IYupValidationMessage> extends TGroup<E> {}
+// export interface YTArray<E extends IYupValidationMessage> extends TArray<E> {}
+
 export class YupFormBuilder implements IFormBuilder<IYupValidationMessage> {
-  public field(field: IFormField<IYupValidationMessage>, validators: ValidatorFunction<any>[]): IFormField<IYupValidationMessage> {
+  public field(field: TField<IYupValidationMessage>, validators: ValidatorFunction<any>[]): YupFormField {
     return new YupFormField(field.value, validators);
   }
 
-  public group(fields: TGroup<IYupValidationMessage>, validators: ValidatorFunction<any>[] = []): IFormGroup<IYupValidationMessage> {
+  public group(fields: TGroup<IYupValidationMessage>, validators: ValidatorFunction<any>[] = []): YupFormGroup {
     return new YupFormGroup(fields, validators);
   }
 
-  public array(fields: TArray<IYupValidationMessage>, validators: ValidatorFunction<any>[] = []): IFormArray<IYupValidationMessage> {
+  public array(fields: TArray<IYupValidationMessage>, validators: ValidatorFunction<any>[] = []): YupFormArray {
     return new YupFormArray(fields, validators);
   }
 }
@@ -47,7 +51,7 @@ export class YupFormField extends YupFormBase {
 
     for (const validator of this.validators) {
       schema = schema.test(validator.name, function (value) {
-        var ret = validator({ path: this.path, value: value, parent: this.parent } as AbstractControl<any>);
+        var ret = validator({ path: this.path, value: value, parent: this.parent } as AbstractFieldOptions<any>);
         if (ret) {
           return this.createError({
             message: {
@@ -73,14 +77,15 @@ export class YupFormGroup extends YupFormBase {
   public getSchema(): Yup.Schema {
     var obj = {};
     Object.keys(this.children).forEach(childKey => {
-      const child = this.children[childKey] as unknown as IYupSchemaProvider;
-      obj = { ...obj, [childKey]: child.getSchema() };
+      const child = this.children[childKey];
+      const childWithSchema = child as unknown as IYupSchemaProvider;
+      obj = { ...obj, [childKey]: childWithSchema.getSchema() };
     });
     var schema = Yup.object().shape(obj);
 
     for (const validator of this.validators) {
       schema = schema.test(validator.name, function (value) {
-        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractControl<any>);
+        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractFieldOptions<any>);
         if (ret) {
           return this.createError({
             message: {
@@ -104,11 +109,12 @@ export class YupFormArray extends YupFormBase {
   }
 
   public getSchema(): Yup.Schema {
-    var schema = Yup.array((this.child as unknown as IYupSchemaProvider).getSchema());
+    const childWithSchema = this.child as unknown as IYupSchemaProvider;
+    var schema = Yup.array((childWithSchema).getSchema());
 
     for (const validator of this.validators) {
       schema = schema.test(validator.name, function (value) {
-        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractControl<any>);
+        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractFieldOptions<any>);
         if (ret) {
           return this.createError({
             message: {
