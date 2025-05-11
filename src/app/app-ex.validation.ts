@@ -1,8 +1,9 @@
 import * as Yup from "yup";
 import { User } from "./app.data";
-import { IYupValidationErrorMessage } from "../yup/IYupValidationErrorMessage";
+import { IYupValidationMessage } from "../yup/IYupValidationErrorMessage";
 
-export const userSchema: Yup.ObjectSchema<User> = Yup.object({
+
+export const AppExSchema: Yup.ObjectSchema<User> = Yup.object({
   name: Yup.object({
     firstname: Yup.string().defined()
       .test("name.firstname required", function (item) {
@@ -12,7 +13,7 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
               key: this.path,
               message: "Firstname not provided.",
               errorCode: "0001"
-            } as Yup.Message<IYupValidationErrorMessage>
+            } as Yup.Message<IYupValidationMessage>
           });
         }
         return true;
@@ -24,7 +25,7 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
               key: this.path,
               message: "Firstname min length is 4 characters.",
               errorCode: "0001"
-            } as Yup.Message<IYupValidationErrorMessage>
+            } as Yup.Message<IYupValidationMessage>
           });
         }
         return true;
@@ -37,7 +38,7 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
               key: this.path,
               message: "Lastname not provided.",
               errorCode: "0002"
-            } as Yup.Message<IYupValidationErrorMessage>
+            } as Yup.Message<IYupValidationMessage>
           });
         }
         return true;
@@ -52,7 +53,7 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
               key: this.path,
               message: "Role Not provided",
               errorCode: "0003"
-            } as Yup.Message<IYupValidationErrorMessage>
+            } as Yup.Message<IYupValidationMessage>
           });
         }
         return true;
@@ -66,7 +67,7 @@ export const userSchema: Yup.ObjectSchema<User> = Yup.object({
             key: this.path,
             message: "Address Not provided",
             errorCode: "0004"
-          } as Yup.Message<IYupValidationErrorMessage>
+          } as Yup.Message<IYupValidationMessage>
         });
       }
       return true;
