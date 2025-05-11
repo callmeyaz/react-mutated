@@ -80,11 +80,11 @@ export class YupFormGroup extends YupFormBase {
 
     for (const validator of this.validators) {
       schema = schema.test(validator.name, function (value) {
-        var ret = validator({ path: `${this.path}.root`, value: value, parent: this.parent } as AbstractControl<any>);
+        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractControl<any>);
         if (ret) {
           return this.createError({
             message: {
-              key: this.path,
+              key: getRootPath(this.path),
               message: ret.message,
               errorCode: ret.errorCode
             } as Yup.Message<IYupValidationMessage>
@@ -108,11 +108,11 @@ export class YupFormArray extends YupFormBase {
 
     for (const validator of this.validators) {
       schema = schema.test(validator.name, function (value) {
-        var ret = validator({ path: `${this.path}.root`, value: value, parent: this.parent } as AbstractControl<any>);
+        var ret = validator({ path: getRootPath(this.path), value: value, parent: this.parent } as AbstractControl<any>);
         if (ret) {
           return this.createError({
             message: {
-              key: this.path,
+              key: getRootPath(this.path),
               message: ret.message,
               errorCode: ret.errorCode
             } as Yup.Message<IYupValidationMessage>
@@ -124,4 +124,8 @@ export class YupFormArray extends YupFormBase {
 
     return schema;
   }
+}
+
+function getRootPath(path: string): string {
+  return `${path}._`;
 }

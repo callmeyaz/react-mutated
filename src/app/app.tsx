@@ -7,18 +7,18 @@ import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
 import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
 import * as Yup from "yup";
 
+const builder = new YupFormBuilder();
+const formGroup = builder.group({
+  name: builder.group({
+    firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
+    lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
+  }, []),
+  roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
+  address: new YupFormField(Yup.string().defined(), [requiredValidator()])
+}, []);
+
 function App() {
   const [userState, setUserState] = useState<User>(user);
-
-  const builder = new YupFormBuilder();
-  const formGroup = builder.group({
-    name: builder.group({
-      firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
-    }, []),
-    roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new YupFormField(Yup.string().defined(), [requiredValidator()])
-  }, []);
 
   const {
     errors,
@@ -39,11 +39,9 @@ function App() {
     setTouchedAll(false);
   }
 
-  // why validation is not working from react-form-runner
   useEffect(() => {
     validate(userState);
   }, [userState]);
-
 
   function addRole() {
     var roles = [...userState.roles, ""]
@@ -54,8 +52,6 @@ function App() {
     <>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
-
-
 
           <div style={{ marginBottom: 20 }}>
             <div>All Fields Touched:</div>
@@ -85,7 +81,7 @@ function App() {
             <h2>User Form</h2>
           </div>
           <div>
-            <ul>{!!touched?.name?.firstname && errors?.name?.firstname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
+            <ul>{errors?.name?.firstname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>First Name</div>
             <input
               onChange={(e) => {
@@ -98,7 +94,7 @@ function App() {
             />
           </div>
           <div>
-            <ul>{!!touched?.name?.lastname && errors?.name?.lastname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
+            <ul>{errors?.name?.lastname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Last Name</div>
             <input onChange={(e) => {
               setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
@@ -114,7 +110,7 @@ function App() {
             {
               userState.roles.map((item, index) => (
                 <div key={index}>
-                  <ul>{!!touched?.roles?.[index] && errors?.roles?.[index]?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
+                  <ul>{errors?.roles?.[index]?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
                   <input key={index} defaultValue={item} onChange={
                     (e) => {
                       setUserState(s => s && setDeep(s, e.target.value, `roles[${index}]`));
@@ -129,7 +125,7 @@ function App() {
             }
           </div>
           <div>
-            <ul>{!!touched?.address && errors?.address?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
+            <ul>{errors?.address?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Address</div>
             <input onChange={
               (e) => {
