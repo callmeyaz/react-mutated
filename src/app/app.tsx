@@ -1,25 +1,25 @@
-import { YupValidator } from "../yup/YupValidator";
-import { useFormRunner } from "react-form-runner";
 import { User, user } from "./app.data";
 import { useEffect, useState } from "react";
 import { setDeep } from "./utils";
+import { useYupFormBuilder } from "../lib/useYupFormBuilder";
 import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
 import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
 import * as Yup from "yup";
 
-
-const builder = new YupFormBuilder();
-const formGroup = builder.group({
-  name: builder.group({
-    firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
-    lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
-  }, []),
-  roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
-  address: new YupFormField(Yup.string().defined(), [requiredValidator()])
-}, []);
+function buildValidation(builder: YupFormBuilder) {
+  return builder.group({
+    name: builder.group({
+      firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
+    }, []),
+    roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new YupFormField(Yup.string().defined(), [requiredValidator()])
+  }, [])
+}
 
 function App() {
   const [userState, setUserState] = useState<User>(user);
+
   const {
     errors,
     touched,
@@ -31,7 +31,7 @@ function App() {
     setDirtyAll,
     setFieldDirty,
     setFieldTouched,
-  } = useFormRunner(new YupValidator(formGroup), userState, {});
+  } = useYupFormBuilder(buildValidation, userState, {});
 
   function reset() {
     setUserState(user);
@@ -83,7 +83,7 @@ function App() {
           <div>
             <ul>{errors?.name?.firstname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>First Name</div>
-            <input
+            <input value={userState.name.firstname}
               onChange={(e) => {
                 setUserState(s => s && setDeep(s, e.target.value, "name.firstname"));
                 setFieldDirty(true, "name.firstname");
@@ -96,10 +96,11 @@ function App() {
           <div>
             <ul>{errors?.name?.lastname?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Last Name</div>
-            <input onChange={(e) => {
-              setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
-              setFieldDirty(true, "name.lastname");
-            }}
+            <input value={userState.name.lastname}
+              onChange={(e) => {
+                setUserState(s => s && setDeep(s, e.target.value, "name.lastname"));
+                setFieldDirty(true, "name.lastname");
+              }}
               onBlur={() => {
                 setFieldTouched(true, "name.lastname");
               }}
@@ -111,7 +112,7 @@ function App() {
               userState.roles.map((item, index) => (
                 <div key={index}>
                   <ul>{errors?.roles?.[index]?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
-                  <input key={index} defaultValue={item} onChange={
+                  <input key={index} value={item} onChange={
                     (e) => {
                       setUserState(s => s && setDeep(s, e.target.value, `roles[${index}]`));
                       setFieldDirty(true, `roles[${index}]`);
@@ -127,17 +128,18 @@ function App() {
           <div>
             <ul>{errors?.address?.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>
             <div>Address</div>
-            <input onChange={
-              (e) => {
-                setUserState(s => s && setDeep(s, e.target.value, "address"));
-                setFieldDirty(true, "address");
-              }}
+            <input value={userState.address}
+              onChange={
+                (e) => {
+                  setUserState(s => s && setDeep(s, e.target.value, "address"));
+                  setFieldDirty(true, "address");
+                }}
               onBlur={() => {
                 setFieldTouched(true, "address");
               }}
             />
           </div>
-          <button onClick={() => reset()} >Validate</button>
+          <button onClick={() => reset()} >Reset</button>
           <button onClick={() => addRole()} >Add Role</button>
         </div>
 

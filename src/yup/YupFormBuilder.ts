@@ -2,7 +2,7 @@
 
 import { IYupValidationMessage } from "./IYupValidationMessage";
 import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
-import { IFormBuilder, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
+import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Yup from "yup";
 
 export interface IYupSchemaProvider {
@@ -39,12 +39,12 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
   protected buildValidationRules(schema: Yup.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Yup.Schema {
     for (const validator of validators) {
       schema = schema.test(validator.name, function (value) {
-        const path = isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: path, value: value, parent: this.parent } as AbstractFieldOptions<any>);
+        const newPath = !isRoot ? this.path : `${this.path}._`;
+        const ret = validator({ path: newPath, value: value, parent: this.parent } as AbstractFieldOptions<any>);
         if (ret) {
           return this.createError({
             message: {
-              key: this.path,
+              key: newPath,
               message: ret.message,
               errorCode: ret.errorCode
             } as Yup.Message<IYupValidationMessage>
@@ -57,7 +57,7 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
   }
 }
 
-export class YupFormField extends YupFormBase {
+export class YupFormField extends YupFormBase implements IFormField<IYupValidationMessage> {
   constructor(public value: Yup.Schema, public validators: ValidatorFunction<any>[] = []) {
     super();
   }
@@ -68,7 +68,7 @@ export class YupFormField extends YupFormBase {
   }
 }
 
-export class YupFormGroup extends YupFormBase {
+export class YupFormGroup extends YupFormBase implements IFormGroup<IYupValidationMessage> {
   constructor(private children: TGroup<IYupValidationMessage>, public validators: ValidatorFunction<any>[] = []) {
     super();
   }
@@ -85,7 +85,7 @@ export class YupFormGroup extends YupFormBase {
   }
 }
 
-export class YupFormArray extends YupFormBase {
+export class YupFormArray extends YupFormBase implements IFormArray<IYupValidationMessage> {
   constructor(private child: TArray<IYupValidationMessage>, public validators: ValidatorFunction<any>[] = []) {
     super();
   }
