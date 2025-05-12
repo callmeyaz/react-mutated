@@ -7,8 +7,7 @@ export type AbstractFieldOptions<T> = {
 
 export interface ValidationResult {
   key: string,
-  message: string,
-  errorCode: string
+  message: string
 }
 
 export interface ValidatorFunction<T> {

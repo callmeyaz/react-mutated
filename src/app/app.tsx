@@ -52,26 +52,21 @@ function App() {
     <>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
-
           <div style={{ marginBottom: 20 }}>
             <div>All Fields Touched:</div>
             <button onClick={() => setTouchedAll(true)} >Touched</button>
             <button onClick={() => setTouchedAll(false)} >Untouched</button>
           </div>
-
           <div style={{ marginBottom: 20 }}>
             <div>All Fields Dirty:</div>
             <button onClick={() => setDirtyAll(true)} >Dirty</button>
             <button onClick={() => setDirtyAll(false)} >Not Dirty</button>
           </div>
-
           <div style={{ marginBottom: 20 }}>
             <div>Error Flat List:</div>
             <div>{JSON.stringify(errorFlatList)}</div>
           </div>
-
         </div>
-
         <div style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, padding: 50 }}>
           <div style={{ marginBottom: 20 }}>
             <div>Initial Sample Data</div>
@@ -144,31 +139,24 @@ function App() {
         </div>
 
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 500 }}>
-
           <div style={{ marginBottom: 20 }}>
             <div>Form State:</div>
             <pre>{JSON.stringify(userState, null, 2)}</pre>
           </div>
-
           <div style={{ marginBottom: 20 }}>
             <div>Form Errors:</div>
             <pre>{JSON.stringify(errors, null, 2)}</pre>
           </div>
-
           <div style={{ marginBottom: 20 }}>
             <div>Form Touched:</div>
             <pre>{JSON.stringify(touched, null, 2)}</pre>
           </div>
-
           <div style={{ marginBottom: 20 }}>
             <div>Form Dirty:</div>
             <pre>{JSON.stringify(dirty, null, 2)}</pre>
           </div>
-
         </div>
       </div>
-
-
     </>
   )
 }

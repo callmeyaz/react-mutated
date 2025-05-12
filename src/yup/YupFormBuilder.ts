@@ -45,8 +45,7 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
           return this.createError({
             message: {
               key: newPath,
-              message: ret.message,
-              errorCode: ret.errorCode
+              message: ret.message
             } as Yup.Message<IYupValidationMessage>
           });
         }
