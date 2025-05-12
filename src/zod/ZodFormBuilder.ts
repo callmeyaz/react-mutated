@@ -28,7 +28,6 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
   public abstract getSchema(): Zod.Schema;
 
   public validate(obj: any): Promise<IZodValidationMessage[]> {
-
     try {
       this.getSchema().parse(obj);
     }
