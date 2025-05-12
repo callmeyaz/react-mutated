@@ -38,7 +38,7 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
 
   protected buildValidationRules(schema: Yup.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Yup.Schema {
     for (const validator of validators) {
-      schema = schema.test(validator.name, function (value) {
+      schema = schema.test(function (value) {
         const newPath = !isRoot ? this.path : `${this.path}._`;
         const ret = validator({ path: newPath, value: value, parent: this.parent } as AbstractFieldOptions<any>);
         if (ret) {
