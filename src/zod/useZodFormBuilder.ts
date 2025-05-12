@@ -1,16 +1,16 @@
 import { FormStateConfig } from "form-runner";
 import { KeyValuePair, useFormRunner } from "react-form-runner";
-import { YupValidator } from "../yup/YupValidator";
-import { IYupValidationMessage } from "../yup/IYupValidationMessage";
-import { IFormGroup } from "./FormBuilder";
-import { YupFormBuilder } from "../yup/YupFormBuilder";
+import { ZodValidator } from "./ZodValidator";
+import { IZodValidationMessage } from "./IZodValidationMessage";
+import { IFormGroup } from "../lib/FormBuilder";
+import { ZodFormBuilder } from "./ZodFormBuilder";
 
-export function useYupFormBuilder<T extends KeyValuePair>(
-  buildValidation: (builder: YupFormBuilder) => IFormGroup<IYupValidationMessage>,
+export function useZodFormBuilder<T extends KeyValuePair>(
+  buildValidation: (builder: ZodFormBuilder) => IFormGroup<IZodValidationMessage>,
   dataObject: T,
   config?: FormStateConfig) {
 
-  const formBuilder = new YupFormBuilder();
+  const formBuilder = new ZodFormBuilder();
   var validationSchema = buildValidation(formBuilder);
 
   const {
@@ -36,7 +36,7 @@ export function useYupFormBuilder<T extends KeyValuePair>(
     setDirtyAll,
     getFieldValid,
     getFieldErrors
-  } = useFormRunner(new YupValidator(validationSchema), dataObject, config);
+  } = useFormRunner(new ZodValidator(validationSchema), dataObject, config);
 
 
   return {

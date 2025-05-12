@@ -1,19 +1,19 @@
 import { User, user } from "./app.data";
 import { useEffect, useState } from "react";
 import { setDeep } from "./utils";
-import { useYupFormBuilder } from "../lib/useYupFormBuilder";
-import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
 import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
 import * as Yup from "yup";
+import { ZodFormBuilder, ZodFormField } from "../zod/ZodFormBuilder";
+import { useZodFormBuilder } from "../zod/useZodFormBuilder";
 
-function buildValidation(builder: YupFormBuilder) {
+function buildValidation(builder: ZodFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
+      firstname: new ZodFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new ZodFormField(Yup.string().defined(), [requiredValidator()]),
     }, []),
-    roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new YupFormField(Yup.string().defined(), [requiredValidator()])
+    roles: builder.array(new ZodFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new ZodFormField(Yup.string().defined(), [requiredValidator()])
   }, [])
 }
 
@@ -31,7 +31,7 @@ function App() {
     setDirtyAll,
     setFieldDirty,
     setFieldTouched,
-  } = useYupFormBuilder(buildValidation, userState, {});
+  } = useZodFormBuilder(buildValidation, userState, {});
 
   function reset() {
     setUserState(user);
