@@ -3,10 +3,11 @@
 import { IZodValidationMessage } from "./IZodValidationMessage";
 import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
-import * as Yup from "yup";
+import { toPath } from "lodash-es";
+import { z as Zod, ZodError } from "zod";
 
 export interface IZodSchemaProvider {
-  getSchema: () => Yup.Schema;
+  getSchema: () => Zod.Schema;
 }
 
 export class ZodFormBuilder implements IFormBuilder<IZodValidationMessage> {
@@ -24,44 +25,66 @@ export class ZodFormBuilder implements IFormBuilder<IZodValidationMessage> {
 }
 
 abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodSchemaProvider {
-  public abstract getSchema(): Yup.Schema;
+  public abstract getSchema(): Zod.Schema;
 
   public validate(obj: any): Promise<IZodValidationMessage[]> {
-    return this.getSchema().validate(obj, { abortEarly: false })
-      .then((_) => {
-        return [];
-      })
-      .catch((err) => {
-        return err.errors as IZodValidationMessage[];
-      });
+
+    try {
+      this.getSchema().parse(obj);
+    }
+    catch (errors) {
+      if (errors instanceof ZodError) {
+        const errorList = (errors as ZodError).issues as Zod.ZodCustomIssue[];
+        const result = errorList.map(err => err.params as IZodValidationMessage);
+        return Promise.resolve(result);
+      }
+    }
+    return Promise.resolve([]);
   }
 
-  protected buildValidationRules(schema: Yup.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Yup.Schema {
-    for (const validator of validators) {
-      schema = schema.test(validator.name, function (value) {
-        const newPath = !isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: newPath, value: value, parent: this.parent } as AbstractFieldOptions<any>);
+  protected buildValidationRules(schema: Zod.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Zod.Schema {
+    var self = this;
+
+    schema = schema.superRefine(function (value: any, ctx: Zod.RefinementCtx) {
+      const appendPath = !isRoot ? [] : ['_'];
+      const pathString = self.fromPath(ctx.path.concat(appendPath));
+      for (const validator of validators) {
+        const ret = validator({ path: pathString, value: value } as AbstractFieldOptions<any>);
         if (ret) {
-          return this.createError({
-            message: {
-              key: newPath,
+          ctx.addIssue({
+            path: appendPath,
+            code: Zod.ZodIssueCode.custom,
+            params: {
+              key: pathString,
               message: ret.message
-            } as Yup.Message<IZodValidationMessage>
-          });
+            } as IZodValidationMessage
+          } as Zod.ZodCustomIssue);
         }
-        return true;
-      });
-    }
+      }
+    });
+
     return schema;
+  }
+
+  private fromPath(pathArray: (string | number)[]): string {
+    return pathArray.reduce((result, key) => {
+      if (/^\d+$/.test(`${key}`)) {
+        return result + `[${key}]`;
+      } else if (result === '') {
+        return key;
+      } else {
+        return result + `.${key}`;
+      }
+    }, '') as string;
   }
 }
 
 export class ZodFormField extends ZodFormBase implements IFormField<IZodValidationMessage> {
-  constructor(public value: Yup.Schema, public validators: ValidatorFunction<any>[] = []) {
+  constructor(public value: Zod.Schema, public validators: ValidatorFunction<any>[] = []) {
     super();
   }
 
-  public getSchema(): Yup.Schema {
+  public getSchema(): Zod.Schema {
     var schema = this.value;
     return this.buildValidationRules(schema, this.validators, false);
   }
@@ -72,14 +95,14 @@ export class ZodFormGroup extends ZodFormBase implements IFormGroup<IZodValidati
     super();
   }
 
-  public getSchema(): Yup.Schema {
+  public getSchema(): Zod.Schema {
     var obj = {};
     Object.keys(this.children).forEach(childKey => {
       const child = this.children[childKey];
       const childWithSchema = child as unknown as IZodSchemaProvider;
       obj = { ...obj, [childKey]: childWithSchema.getSchema() };
     });
-    var schema = Yup.object().shape(obj);
+    var schema = Zod.object(obj);
     return this.buildValidationRules(schema, this.validators, true);
   }
 }
@@ -89,9 +112,9 @@ export class ZodFormArray extends ZodFormBase implements IFormArray<IZodValidati
     super();
   }
 
-  public getSchema(): Yup.Schema {
+  public getSchema(): Zod.Schema {
     const childWithSchema = this.child as unknown as IZodSchemaProvider;
-    var schema = Yup.array((childWithSchema).getSchema());
+    var schema = Zod.array((childWithSchema).getSchema());
     return this.buildValidationRules(schema, this.validators, true);
   }
 }

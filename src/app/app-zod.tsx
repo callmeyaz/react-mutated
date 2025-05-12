@@ -2,22 +2,22 @@ import { User, user } from "./app.data";
 import { useEffect, useState } from "react";
 import { setDeep } from "./utils";
 import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
-import * as Yup from "yup";
+import { z as Zod } from "zod";
 import { ZodFormBuilder, ZodFormField } from "../zod/ZodFormBuilder";
 import { useZodFormBuilder } from "../zod/useZodFormBuilder";
 
 function buildValidation(builder: ZodFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new ZodFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new ZodFormField(Yup.string().defined(), [requiredValidator()]),
+      firstname: new ZodFormField(Zod.string(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new ZodFormField(Zod.string(), [requiredValidator()]),
     }, []),
-    roles: builder.array(new ZodFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new ZodFormField(Yup.string().defined(), [requiredValidator()])
+    roles: builder.array(new ZodFormField(Zod.string(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new ZodFormField(Zod.string(), [requiredValidator()])
   }, [])
 }
 
-function App() {
+function ZodApp() {
   const [userState, setUserState] = useState<User>(user);
 
   const {
@@ -161,4 +161,4 @@ function App() {
   )
 }
 
-export default App
+export default ZodApp
