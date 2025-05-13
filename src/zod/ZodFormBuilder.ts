@@ -48,7 +48,7 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
       const appendPath = !isRoot ? [] : ['_'];
       const pathString = self.fromPath(ctx.path.concat(appendPath));
       for (const validator of validators) {
-        const ret = validator({ path: pathString, value: value } as AbstractFieldOptions<any>);
+        const ret = validator({ path: pathString, value: value, parent: ctx.data } as AbstractFieldOptions<any>);
         if (ret) {
           ctx.addIssue({
             path: appendPath,
