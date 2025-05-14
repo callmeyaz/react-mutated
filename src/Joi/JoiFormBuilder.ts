@@ -1,7 +1,7 @@
 
 
 import { IJoiValidationMessage } from "./IJoiValidationMessage";
-import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
+import { ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Joi from "joi";
 
@@ -27,32 +27,34 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
   public abstract getSchema(): Joi.Schema;
 
   public validate(obj: any): Promise<IJoiValidationMessage[]> {
-    return this.getSchema().validate(obj, { abortEarly: false })
-      .then((_) => {
-        return [];
-      })
-      .catch((err) => {
-        return err.errors as IJoiValidationMessage[];
-      });
+    var result = this.getSchema().options({ abortEarly: false }).validate(obj);
+    console.log("result: ", result);
+    // return errors here.
+    return Promise.resolve([]);
   }
 
   protected buildValidationRules(schema: Joi.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Joi.Schema {
+    var self = this;
     for (const validator of validators) {
-      schema = schema.test(validator.name, function (value) {
-        const newPath = !isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: newPath, value: value, parent: this.parent } as AbstractFieldOptions<any>);
-        if (ret) {
-          return this.createError({
-            message: {
-              key: newPath,
-              message: ret.message
-            } as Joi.Message<IJoiValidationMessage>
-          });
-        }
-        return true;
+      schema = schema.custom(function (value, helpers) {
+        console.log(helpers.state.path);
+        // add some code here.
+        return value;
       });
-    }
+    };
     return schema;
+  }
+
+  private fromPath(pathArray: (string | number)[]): string {
+    return pathArray.reduce((result, key) => {
+      if (/^\d+$/.test(`${key}`)) {
+        return result + `[${key}]`;
+      } else if (result === '') {
+        return key;
+      } else {
+        return result + `.${key}`;
+      }
+    }, '') as string;
   }
 }
 
@@ -79,7 +81,7 @@ export class JoiFormGroup extends JoiFormBase implements IFormGroup<IJoiValidati
       const childWithSchema = child as unknown as IJoiSchemaProvider;
       obj = { ...obj, [childKey]: childWithSchema.getSchema() };
     });
-    var schema = Joi.object().shape(obj);
+    var schema = Joi.object(obj);
     return this.buildValidationRules(schema, this.validators, true);
   }
 }
@@ -91,7 +93,7 @@ export class JoiFormArray extends JoiFormBase implements IFormArray<IJoiValidati
 
   public getSchema(): Joi.Schema {
     const childWithSchema = this.child as unknown as IJoiSchemaProvider;
-    var schema = Joi.array((childWithSchema).getSchema());
+    var schema = Joi.array().items(childWithSchema.getSchema());
     return this.buildValidationRules(schema, this.validators, true);
   }
 }
