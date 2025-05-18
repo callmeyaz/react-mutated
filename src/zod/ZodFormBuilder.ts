@@ -3,11 +3,10 @@
 import { IZodValidationMessage } from "./IZodValidationMessage";
 import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
-import { toPath } from "lodash-es";
 import { z as Zod, ZodError } from "zod";
 
 export interface IZodSchemaProvider {
-  getSchema: () => Zod.Schema;
+  getSchema: (data: any) => Zod.Schema;
 }
 
 export class ZodFormBuilder implements IFormBuilder<IZodValidationMessage> {
@@ -25,11 +24,11 @@ export class ZodFormBuilder implements IFormBuilder<IZodValidationMessage> {
 }
 
 abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodSchemaProvider {
-  public abstract getSchema(): Zod.Schema;
+  public abstract getSchema(data: any): Zod.Schema;
 
-  public validate(obj: any): Promise<IZodValidationMessage[]> {
+  public validate(data: any): Promise<IZodValidationMessage[]> {
     try {
-      this.getSchema().parse(obj);
+      this.getSchema(data).parse(data);
     }
     catch (errors) {
       if (errors instanceof ZodError) {
@@ -41,14 +40,14 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
     return Promise.resolve([]);
   }
 
-  protected buildValidationRules(schema: Zod.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Zod.Schema {
+  protected buildValidationRules(schema: Zod.Schema, data: any, validators: ValidatorFunction<any>[], isRoot: boolean): Zod.Schema {
     var self = this;
 
     schema = schema.superRefine(function (value: any, ctx: Zod.RefinementCtx) {
       const appendPath = !isRoot ? [] : ['_'];
       const pathString = self.fromPath(ctx.path.concat(appendPath));
       for (const validator of validators) {
-        const ret = validator({ path: pathString, value: value} as AbstractFieldOptions<any>);
+        const ret = validator({ path: pathString, value: value, parent: data } as AbstractFieldOptions<any>);
         if (ret) {
           ctx.addIssue({
             path: appendPath,
@@ -83,9 +82,9 @@ export class ZodFormField extends ZodFormBase implements IFormField<IZodValidati
     super();
   }
 
-  public getSchema(): Zod.Schema {
+  public getSchema(data: any): Zod.Schema {
     var schema = this.value;
-    return this.buildValidationRules(schema, this.validators, false);
+    return this.buildValidationRules(schema, data, this.validators, false);
   }
 }
 
@@ -94,15 +93,15 @@ export class ZodFormGroup extends ZodFormBase implements IFormGroup<IZodValidati
     super();
   }
 
-  public getSchema(): Zod.Schema {
+  public getSchema(data: any): Zod.Schema {
     var obj = {};
     Object.keys(this.children).forEach(childKey => {
       const child = this.children[childKey];
       const childWithSchema = child as unknown as IZodSchemaProvider;
-      obj = { ...obj, [childKey]: childWithSchema.getSchema() };
+      obj = { ...obj, [childKey]: childWithSchema.getSchema(data) };
     });
     var schema = Zod.object(obj);
-    return this.buildValidationRules(schema, this.validators, true);
+    return this.buildValidationRules(schema, data, this.validators, true);
   }
 }
 
@@ -111,9 +110,9 @@ export class ZodFormArray extends ZodFormBase implements IFormArray<IZodValidati
     super();
   }
 
-  public getSchema(): Zod.Schema {
+  public getSchema(data: any): Zod.Schema {
     const childWithSchema = this.child as unknown as IZodSchemaProvider;
-    var schema = Zod.array((childWithSchema).getSchema());
-    return this.buildValidationRules(schema, this.validators, true);
+    var schema = Zod.array((childWithSchema).getSchema(data));
+    return this.buildValidationRules(schema, data, this.validators, true);
   }
 }
