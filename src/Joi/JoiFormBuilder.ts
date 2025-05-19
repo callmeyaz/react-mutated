@@ -1,7 +1,7 @@
 
 
 import { IJoiValidationMessage } from "./IJoiValidationMessage";
-import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
+import { ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Joi from "joi";
 import { map } from "lodash-es";

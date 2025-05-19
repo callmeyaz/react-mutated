@@ -1,7 +1,7 @@
 
 
 import { IYupValidationMessage } from "./IYupValidationMessage";
-import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
+import { ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Yup from "yup";
 
@@ -40,7 +40,7 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
     for (const validator of validators) {
       schema = schema.test(function (value) {
         const newPath = !isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: newPath, value: value, parent: this.parent } as AbstractFieldOptions<any>);
+        const ret = validator({ path: newPath, value: value, parent: this.parent });
         if (ret) {
           return this.createError({
             message: {

@@ -1,7 +1,7 @@
 
 
 import { IZodValidationMessage } from "./IZodValidationMessage";
-import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
+import { ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import { z as Zod, ZodError } from "zod";
 
@@ -47,7 +47,7 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
       const appendPath = !isRoot ? [] : ['_'];
       const pathString = self.fromPath(ctx.path.concat(appendPath));
       for (const validator of validators) {
-        const ret = validator({ path: pathString, value: value, parent: data } as AbstractFieldOptions<any>);
+        const ret = validator({ path: pathString, value: value, parent: data });
         if (ret) {
           ctx.addIssue({
             path: appendPath,
