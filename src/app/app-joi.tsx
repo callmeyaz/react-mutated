@@ -9,11 +9,11 @@ import { useJoiFormBuilder } from "../Joi/useJoiFormBuilder";
 function buildValidation(builder: JoiFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new JoiFormField(Joi.string(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new JoiFormField(Joi.string(), [requiredValidator()]),
+      firstname: new JoiFormField(Joi.any(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new JoiFormField(Joi.any(), [requiredValidator()]),
     }, []),
-    roles: builder.array(new JoiFormField(Joi.string(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new JoiFormField(Joi.string(), [requiredValidator()])
+    roles: builder.array(new JoiFormField(Joi.any(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new JoiFormField(Joi.any(), [requiredValidator()])
   }, [])
 }
 
@@ -50,6 +50,7 @@ function JoiApp() {
 
   return (
     <>
+    <h2>Joi Test Bed</h2>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
           <div style={{ marginBottom: 20 }}>

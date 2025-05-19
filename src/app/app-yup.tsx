@@ -50,6 +50,7 @@ function YupApp() {
 
   return (
     <>
+    <h2>Yup Test Bed</h2>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
           <div style={{ marginBottom: 20 }}>

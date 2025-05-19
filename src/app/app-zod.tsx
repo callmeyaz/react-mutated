@@ -9,11 +9,11 @@ import { useZodFormBuilder } from "../zod/useZodFormBuilder";
 function buildValidation(builder: ZodFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new ZodFormField(Zod.string(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new ZodFormField(Zod.string(), [requiredValidator()]),
+      firstname: new ZodFormField(Zod.any(), [requiredValidator(), minLengthValidator(4)]),
+      lastname: new ZodFormField(Zod.any(), [requiredValidator()]),
     }, []),
-    roles: builder.array(new ZodFormField(Zod.string(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new ZodFormField(Zod.string(), [requiredValidator()])
+    roles: builder.array(new ZodFormField(Zod.any(), [requiredValidator()]), [atleastOneItemValidator()]),
+    address: new ZodFormField(Zod.any(), [requiredValidator()])
   }, [])
 }
 
@@ -50,6 +50,7 @@ function ZodApp() {
 
   return (
     <>
+    <h2>Zod Test Bed</h2>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
           <div style={{ marginBottom: 20 }}>

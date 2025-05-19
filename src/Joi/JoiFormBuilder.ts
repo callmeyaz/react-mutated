@@ -1,9 +1,10 @@
 
 
 import { IJoiValidationMessage } from "./IJoiValidationMessage";
-import { ValidatorFunction } from "../lib/ValidatorFunction";
+import { AbstractFieldOptions, ValidatorFunction } from "../lib/ValidatorFunction";
 import { IFormArray, IFormBuilder, IFormField, IFormGroup, IValidatable, TArray, TField, TGroup } from "../lib/FormBuilder";
 import * as Joi from "joi";
+import { map } from "lodash-es";
 
 export interface IJoiSchemaProvider {
   getSchema: () => Joi.Schema;
@@ -28,8 +29,12 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
 
   public validate(obj: any): Promise<IJoiValidationMessage[]> {
     var result = this.getSchema().options({ abortEarly: false }).validate(obj);
-    console.log("result: ", result);
-    // return errors here.
+    if(result && result.error && result.error.details) {
+      const typed: IJoiValidationMessage[] = map(result.error.details, (item) => {
+        return item.context!.error as unknown as IJoiValidationMessage;
+      });
+      return Promise.resolve(typed);
+    }
     return Promise.resolve([]);
   }
 
@@ -37,8 +42,13 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
     var self = this;
     for (const validator of validators) {
       schema = schema.custom(function (value, helpers) {
-        console.log(helpers.state.path);
-        // add some code here.
+        const appendPath = !isRoot ? [] : ['_'];
+        const pathString = self.fromPath((helpers.state.path ?? []).concat(appendPath));
+        const ret = validator({ path: pathString, value: value, parent: helpers.state.parent });
+        if (ret) {
+          var message = { key: pathString, message: ret.message } as IJoiValidationMessage;
+          return helpers.error("any.custom", { error: message });
+        }
         return value;
       });
     };
