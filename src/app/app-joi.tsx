@@ -1,10 +1,11 @@
 import { User, user } from "./app.data";
 import { useEffect, useState } from "react";
 import { setDeep } from "./utils";
-import { atleastOneItemValidator, minLengthValidator, requiredValidator } from "../lib/Validators";
-import Joi from "joi";
 import { JoiFormBuilder, JoiFormField } from "../Joi/JoiFormBuilder";
 import { useJoiFormBuilder } from "../Joi/useJoiFormBuilder";
+import { requiredValidator } from "../lib/Validators/RequiredValidator";
+import { minLengthValidator } from "../lib/Validators/MinLengthValidator";
+import { atleastOneItemValidator } from "../lib/Validators/AtleastOneItemValidator";
 
 function buildValidation(builder: JoiFormBuilder) {
   return builder.group({
