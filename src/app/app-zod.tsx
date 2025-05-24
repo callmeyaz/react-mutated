@@ -9,11 +9,11 @@ import { useZodFormBuilder } from "../zod/useZodFormBuilder";
 function buildValidation(builder: ZodFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new ZodFormField(Zod.any(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new ZodFormField(Zod.any(), [requiredValidator()]),
+      firstname: new ZodFormField([requiredValidator(), minLengthValidator(4)]),
+      lastname: new ZodFormField([requiredValidator()]),
     }, []),
-    roles: builder.array(new ZodFormField(Zod.any(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new ZodFormField(Zod.any(), [requiredValidator()])
+    roles: builder.array(new ZodFormField([requiredValidator()]), [atleastOneItemValidator()]),
+    address: new ZodFormField([requiredValidator()])
   }, [])
 }
 

@@ -11,8 +11,8 @@ export interface IJoiSchemaProvider {
 }
 
 export class JoiFormBuilder implements IFormBuilder<IJoiValidationMessage> {
-  public field(field: TField<IJoiValidationMessage>, validators: ValidatorFunction<any>[]): JoiFormField {
-    return new JoiFormField(field.value, validators);
+  public field(validators: ValidatorFunction<any>[]): JoiFormField {
+    return new JoiFormField(validators);
   }
 
   public group(fields: TGroup<IJoiValidationMessage>, validators: ValidatorFunction<any>[] = []): JoiFormGroup {
@@ -69,12 +69,12 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
 }
 
 export class JoiFormField extends JoiFormBase implements IFormField<IJoiValidationMessage> {
-  constructor(public value: Joi.Schema, public validators: ValidatorFunction<any>[] = []) {
+  constructor(public validators: ValidatorFunction<any>[] = []) {
     super();
   }
 
   public getSchema(): Joi.Schema {
-    var schema = this.value;
+    var schema = Joi.any();
     return this.buildValidationRules(schema, this.validators, false);
   }
 }

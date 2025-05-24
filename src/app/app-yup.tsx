@@ -9,11 +9,11 @@ import { useYupFormBuilder } from "../yup/useYupFormBuilder";
 function buildValidation(builder: YupFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new YupFormField(Yup.string().defined(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new YupFormField(Yup.string().defined(), [requiredValidator()]),
+      firstname: new YupFormField([requiredValidator(), minLengthValidator(4)]),
+      lastname: new YupFormField([requiredValidator()]),
     }, []),
-    roles: builder.array(new YupFormField(Yup.string().defined(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new YupFormField(Yup.string().defined(), [requiredValidator()])
+    roles: builder.array(new YupFormField([requiredValidator()]), [atleastOneItemValidator()]),
+    address: new YupFormField([requiredValidator()])
   }, [])
 }
 

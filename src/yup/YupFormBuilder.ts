@@ -10,8 +10,8 @@ export interface IYupSchemaProvider {
 }
 
 export class YupFormBuilder implements IFormBuilder<IYupValidationMessage> {
-  public field(field: TField<IYupValidationMessage>, validators: ValidatorFunction<any>[]): YupFormField {
-    return new YupFormField(field.value, validators);
+  public field(validators: ValidatorFunction<any>[]): YupFormField {
+    return new YupFormField(validators);
   }
 
   public group(fields: TGroup<IYupValidationMessage>, validators: ValidatorFunction<any>[] = []): YupFormGroup {
@@ -38,9 +38,9 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
 
   protected buildValidationRules(schema: Yup.Schema, validators: ValidatorFunction<any>[], isRoot: boolean): Yup.Schema {
     for (const validator of validators) {
-      schema = schema.test(function (value) {
+      schema = schema.test(function (item) {
         const newPath = !isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: newPath, value: value, parent: this.parent });
+        const ret = validator({ path: newPath, value: item, parent: this.parent });
         if (ret) {
           return this.createError({
             message: {
@@ -57,12 +57,12 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
 }
 
 export class YupFormField extends YupFormBase implements IFormField<IYupValidationMessage> {
-  constructor(public value: Yup.Schema, public validators: ValidatorFunction<any>[] = []) {
+  constructor(public validators: ValidatorFunction<any>[] = []) {
     super();
   }
 
   public getSchema(): Yup.Schema {
-    var schema = this.value;
+    var schema = Yup.string().defined();
     return this.buildValidationRules(schema, this.validators, false);
   }
 }

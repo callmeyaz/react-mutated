@@ -10,8 +10,8 @@ export interface IZodSchemaProvider {
 }
 
 export class ZodFormBuilder implements IFormBuilder<IZodValidationMessage> {
-  public field(field: TField<IZodValidationMessage>, validators: ValidatorFunction<any>[]): ZodFormField {
-    return new ZodFormField(field.value, validators);
+  public field(validators: ValidatorFunction<any>[]): ZodFormField {
+    return new ZodFormField(validators);
   }
 
   public group(fields: TGroup<IZodValidationMessage>, validators: ValidatorFunction<any>[] = []): ZodFormGroup {
@@ -43,11 +43,11 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
   protected buildValidationRules(schema: Zod.Schema, data: any, validators: ValidatorFunction<any>[], isRoot: boolean): Zod.Schema {
     var self = this;
 
-    schema = schema.superRefine(function (value: any, ctx: Zod.RefinementCtx) {
+    schema = schema.superRefine(function (item: any, ctx: Zod.RefinementCtx) {
       const appendPath = !isRoot ? [] : ['_'];
       const pathString = self.fromPath(ctx.path.concat(appendPath));
       for (const validator of validators) {
-        const ret = validator({ path: pathString, value: value, parent: data });
+        const ret = validator({ path: pathString, value: item, parent: data });
         if (ret) {
           ctx.addIssue({
             path: appendPath,
@@ -78,12 +78,12 @@ abstract class ZodFormBase implements IValidatable<IZodValidationMessage>, IZodS
 }
 
 export class ZodFormField extends ZodFormBase implements IFormField<IZodValidationMessage> {
-  constructor(public value: Zod.Schema, public validators: ValidatorFunction<any>[] = []) {
+  constructor(public validators: ValidatorFunction<any>[] = []) {
     super();
   }
 
   public getSchema(data: any): Zod.Schema {
-    var schema = this.value;
+    var schema = Zod.any();
     return this.buildValidationRules(schema, data, this.validators, false);
   }
 }

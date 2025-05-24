@@ -1,9 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './app/app-zod'
+import YupApp from './app/app-yup'
+import ZodApp from './app/app-zod'
+import JoiApp from './app/app-joi'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <YupApp />
+    <ZodApp />
+    <JoiApp />
   </StrictMode>,
 )

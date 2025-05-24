@@ -9,11 +9,11 @@ import { useJoiFormBuilder } from "../Joi/useJoiFormBuilder";
 function buildValidation(builder: JoiFormBuilder) {
   return builder.group({
     name: builder.group({
-      firstname: new JoiFormField(Joi.any(), [requiredValidator(), minLengthValidator(4)]),
-      lastname: new JoiFormField(Joi.any(), [requiredValidator()]),
+      firstname: new JoiFormField([requiredValidator(), minLengthValidator(4)]),
+      lastname: new JoiFormField([requiredValidator()]),
     }, []),
-    roles: builder.array(new JoiFormField(Joi.any(), [requiredValidator()]), [atleastOneItemValidator()]),
-    address: new JoiFormField(Joi.any(), [requiredValidator()])
+    roles: builder.array(new JoiFormField([requiredValidator()]), [atleastOneItemValidator()]),
+    address: new JoiFormField([requiredValidator()])
   }, [])
 }
 

@@ -7,7 +7,6 @@ export interface IValidatable<E extends IValidationMessage> {
 }
 
 export interface IFormField<E extends IValidationMessage> extends IValidatable<E> {
-  value: any;
   validators: ValidatorFunction<any>[];
 }
 
@@ -24,7 +23,7 @@ export type TGroup<E extends IValidationMessage> = { [key: string]: (IFormField<
 export type TArray<E extends IValidationMessage> = (IFormField<E> | TGroup<E>);
 
 export interface IFormBuilder<E extends IValidationMessage> {
-  field: <TVal extends TField<E>>(field: TVal, validators: ValidatorFunction<any>[]) => IFormField<E>;
+  field: (validators: ValidatorFunction<any>[]) => IFormField<E>;
   group: <TVal extends TGroup<E>>(fields: TVal, validators: ValidatorFunction<any>[]) => IFormGroup<E>;
   array: <TVal extends TArray<E>>(fields: TVal, validators: ValidatorFunction<any>[]) => IFormArray<E>;
 }
