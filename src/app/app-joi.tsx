@@ -5,7 +5,7 @@ import { JoiFormBuilder, JoiFormField } from "../Joi/JoiFormBuilder";
 import { useJoiFormBuilder } from "../Joi/useJoiFormBuilder";
 import { requiredValidator } from "../lib/Validators/RequiredValidator";
 import { minLengthValidator } from "../lib/Validators/MinLengthValidator";
-import { atleastOneItemValidator } from "../lib/Validators/AtleastOneItemValidator";
+import { atleastOneItemValidator } from "../lib/Validators/Arrays/AtleastOneItemValidator";
 
 function buildValidation(builder: JoiFormBuilder) {
   return builder.group({

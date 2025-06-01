@@ -5,7 +5,7 @@ import { ZodFormBuilder, ZodFormField } from "../zod/ZodFormBuilder";
 import { useZodFormBuilder } from "../zod/useZodFormBuilder";
 import { minLengthValidator } from "../lib/Validators/MinLengthValidator";
 import { requiredValidator } from "../lib/Validators/RequiredValidator";
-import { atleastOneItemValidator } from "../lib/Validators/AtleastOneItemValidator";
+import { atleastOneItemValidator } from "../lib/Validators/Arrays/AtleastOneItemValidator";
 
 function buildValidation(builder: ZodFormBuilder) {
   return builder.group({
