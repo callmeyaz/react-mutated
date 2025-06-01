@@ -1,4 +1,4 @@
-import { AbstractFieldOptions, ValidationResult, ValidatorFunction } from "../ValidatorFunction";
+import { AbstractFieldOptions, ValidationResult, ValidatorFunction } from "../../ValidatorFunction";
 
 export function atleastOneItemValidator<T extends Array<string>>(): ValidatorFunction<T> {
   return (control: AbstractFieldOptions<T>): ValidationResult | null => {

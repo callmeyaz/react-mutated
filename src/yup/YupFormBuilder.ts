@@ -10,6 +10,7 @@ export interface IYupSchemaProvider {
 }
 
 export class YupFormBuilder implements IFormBuilder<IYupValidationMessage> {
+  
   public field(validators: ValidatorFunction<any>[]): YupFormField {
     return new YupFormField(validators);
   }
@@ -40,7 +41,7 @@ abstract class YupFormBase implements IValidatable<IYupValidationMessage>, IYupS
     for (const validator of validators) {
       schema = schema.test(function (item) {
         const newPath = !isRoot ? this.path : `${this.path}._`;
-        const ret = validator({ path: newPath, value: item, parent: this.parent });
+        const ret = validator({ path: newPath, value: item, parent: this.parent || item });
         if (ret) {
           return this.createError({
             message: {

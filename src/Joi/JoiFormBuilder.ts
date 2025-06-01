@@ -44,7 +44,7 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
       schema = schema.custom(function (value, helpers) {
         const appendPath = !isRoot ? [] : ['_'];
         const pathString = self.fromPath((helpers.state.path ?? []).concat(appendPath));
-        const ret = validator({ path: pathString, value: value, parent: helpers.state.parent });
+        const ret = validator({ path: pathString, value: value, parent: helpers.state.parent || value });
         if (ret) {
           var message = { key: pathString, message: ret.message } as IJoiValidationMessage;
           return helpers.error("any.custom", { error: message });
