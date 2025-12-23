@@ -28,9 +28,9 @@ abstract class JoiFormBase implements IValidatable<IJoiValidationMessage>, IJoiS
   public abstract getSchema(): Joi.Schema;
 
   public validate(obj: any): Promise<IJoiValidationMessage[]> {
-    var result = this.getSchema().options({ abortEarly: false }).validate(obj);
-    if(result && result.error && result.error.details) {
-      const typed: IJoiValidationMessage[] = map(result.error.details, (item) => {
+    var { error, value } = this.getSchema().validate(obj, { abortEarly: false });
+    if(error && error.details) {
+      const typed: IJoiValidationMessage[] = map(error.details, (item) => {
         return item.context!.error as unknown as IJoiValidationMessage;
       });
       return Promise.resolve(typed);

@@ -1,25 +1,36 @@
 import { User, user } from "./app.data";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { setDeep } from "./utils";
-import { YupFormBuilder, YupFormField } from "../yup/YupFormBuilder";
+import { YupFormBuilder, YupFormField, YupFormGroup } from "../yup/YupFormBuilder";
 import { useYupFormBuilder } from "../yup/useYupFormBuilder";
 import { requiredValidator } from "../lib/Validators/RequiredValidator";
 import { minLengthValidator } from "../lib/Validators/MinLengthValidator";
-import { atleastOneItemValidator } from "../lib/Validators/AtleastOneItemValidator";
+import { atleastOneItemValidator } from "../lib/Validators/Arrays/AtleastOneItemValidator";
+import { hasPropertyValueValidator } from "../lib/Validators/Objects/hasPropertyValueValidator";
+import { dynamicValidator } from "../lib/Validators/Objects/dynamicValidator";
 
-function buildValidation(builder: YupFormBuilder) {
-  return builder.group({
-    name: builder.group({
-      firstname: new YupFormField([requiredValidator(), minLengthValidator(4)]),
-      lastname: new YupFormField([requiredValidator()]),
-    }, []),
-    roles: builder.array(new YupFormField([requiredValidator()]), [atleastOneItemValidator()]),
-    address: new YupFormField([requiredValidator()])
-  }, [])
+function buildValidation(this: any, user: User) {
+  return function (builder: YupFormBuilder) {
+    return builder.group({
+      name: builder.group({
+        firstname: new YupFormField([requiredValidator(), minLengthValidator(4)]),
+        lastname: new YupFormField([requiredValidator()]),
+      }, []),
+      roles: builder.array(new YupFormField([requiredValidator()]), [atleastOneItemValidator()]),
+      address: new YupFormField([requiredValidator()])
+    }, [
+      dynamicValidator([user], function (this: any) {
+        console.log('dynamicValidator', this);
+        return (user.name?.firstname != "good") ? "bad!!!" : null;
+      }),
+    ]);
+  }
 }
+// hasPropertyValueValidator("address", user)
 
 function YupApp() {
   const [userState, setUserState] = useState<User>(user);
+  const validationBuilder = useMemo(() => { return buildValidation(userState) }, [userState]);
 
   const {
     errors,
@@ -32,7 +43,7 @@ function YupApp() {
     setDirtyAll,
     setFieldDirty,
     setFieldTouched,
-  } = useYupFormBuilder(buildValidation, userState, {});
+  } = useYupFormBuilder(validationBuilder, userState, {});
 
   function reset() {
     setUserState(user);
@@ -51,7 +62,7 @@ function YupApp() {
 
   return (
     <>
-    <h2>Yup Test Bed</h2>
+      <h2>Yup Test Bed</h2>
       <div style={{ display: "flex" }}>
         <div style={{ flexGrow: 0, flexShrink: 0, flexBasis: 400 }}>
           <div style={{ marginBottom: 20 }}>
